@@ -1,29 +1,29 @@
 package db
 
-import(
+import (
 	"fmt"
+	models2 "github.com/kas240sx89/samples/profileService/internal/models"
 	"sync"
 	"time"
-	"github.com/kas240sx89/samples/golang/profileService/internal/models"
 )
 
 type InMemoryDB struct {
-	mtx sync.RWMutex
-	profileStore map[string]models.Profile
-	emailStore map[string] string
+	mtx          sync.RWMutex
+	profileStore map[string]models2.Profile
+	emailStore   map[string]string
 }
 
 func NewInMemoryDB() InMemoryDB {
-	p := make(map[string]models.Profile)
+	p := make(map[string]models2.Profile)
 	e := make(map[string]string)
 	return InMemoryDB{
 		profileStore: p,
-		emailStore: e,
- 	}
+		emailStore:   e,
+	}
 }
 
 //GetProfileID returns the profile id associated with the "email", if none exists a empty string is returned
-func(db *InMemoryDB) GetProfileID(email string) (string, error) {
+func (db *InMemoryDB) GetProfileID(email string) (string, error) {
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
 
@@ -35,7 +35,7 @@ func(db *InMemoryDB) GetProfileID(email string) (string, error) {
 }
 
 //GetProfile returns the profile associated with the passed in "id"
-func(db *InMemoryDB) GetProfile(id string) (*models.Profile, error) {
+func (db *InMemoryDB) GetProfile(id string) (*models2.Profile, error) {
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
 
@@ -47,39 +47,41 @@ func(db *InMemoryDB) GetProfile(id string) (*models.Profile, error) {
 }
 
 //CreateProfile creates the profile withing the database. if the profile exists or the email exist returns error
-func(db *InMemoryDB) CreateProfile(profile *models.Profile) (*models.Profile, error){
+func (db *InMemoryDB) CreateProfile(profile *models2.Profile) (*models2.Profile, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
-	if _, ok := db.profileStore[profile.Id]; ok{
+	if _, ok := db.profileStore[profile.Id]; ok {
 		return nil, fmt.Errorf("profile already exists")
 	}
 
-	if _, ok := db.emailStore[profile.Email]; ok{
+	if _, ok := db.emailStore[profile.Email]; ok {
 		return nil, fmt.Errorf("email already exists")
 	}
 
+	profile.LastUpdated = time.Now()
 	db.profileStore[profile.Id] = *profile
 	db.emailStore[profile.Email] = profile.Id
-	profile.LastUpdated = time.Now()
+
 	return profile, nil
 }
 
 //UpdateProfile updates a profile, if profile does not exist returns error
-func(db *InMemoryDB) UpdateProfile(profile *models.Profile) (*models.Profile, error){
+func (db *InMemoryDB) UpdateProfile(profile *models2.Profile) (*models2.Profile, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
-	 old, ok := db.profileStore[profile.Id]
+	old, ok := db.profileStore[profile.Id]
 	if !ok {
 		return nil, fmt.Errorf("profile not found")
 	}
-		if old.Email != profile.Email{
+
+	if old.Email != profile.Email {
 		delete(db.emailStore, old.Email)
 		db.emailStore[profile.Email] = profile.Id
 	}
 
-	if old.LastUpdated != profile.LastUpdated{
+	if old.LastUpdated.UnixNano() > profile.LastUpdated.UnixNano() {
 		return &old, fmt.Errorf("there is a newer profile")
 	}
 
@@ -89,12 +91,12 @@ func(db *InMemoryDB) UpdateProfile(profile *models.Profile) (*models.Profile, er
 }
 
 //DeleteProfile removes a profile by "id"
-func(db *InMemoryDB) DeleteProfile(id string) error{
+func (db *InMemoryDB) DeleteProfile(id string) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	profile, ok := db.profileStore[id]
-	if !ok{
+	if !ok {
 		return nil
 	}
 

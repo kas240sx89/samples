@@ -1,21 +1,21 @@
 package main
 
-import(
+import (
+	service2 "github.com/kas240sx89/samples/profileService/internal/service"
 	"io"
 	"log"
 	"net/http"
-	"github.com/kas240sx89/samples/golang/profileService/internal/service"
 )
 
-type HttpEndpoints struct{
-	svc *service.Service
+type HttpEndpoints struct {
+	svc *service2.Service
 }
 
 //NewServer creates a new http server and listens for requests
-func NewServer( service *service.Service) {
+func NewServer(service *service2.Service) {
 
 	s := HttpEndpoints{service}
-	
+
 	http.HandleFunc("/get_profile", s.GetProfile)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -47,4 +47,3 @@ func (h *HttpEndpoints) GetProfile(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(200)
 	return
 }
-
