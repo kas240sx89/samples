@@ -2,19 +2,19 @@ package db
 
 import (
 	"fmt"
-	models2 "github.com/kas240sx89/samples/profileService/internal/models"
+	"github.com/kas240sx89/samples/profileService/internal/models"
 	"sync"
 	"time"
 )
 
 type InMemoryDB struct {
 	mtx          sync.RWMutex
-	profileStore map[string]models2.Profile
+	profileStore map[string]models.Profile
 	emailStore   map[string]string
 }
 
 func NewInMemoryDB() InMemoryDB {
-	p := make(map[string]models2.Profile)
+	p := make(map[string]models.Profile)
 	e := make(map[string]string)
 	return InMemoryDB{
 		profileStore: p,
@@ -35,7 +35,7 @@ func (db *InMemoryDB) GetProfileID(email string) (string, error) {
 }
 
 //GetProfile returns the profile associated with the passed in "id"
-func (db *InMemoryDB) GetProfile(id string) (*models2.Profile, error) {
+func (db *InMemoryDB) GetProfile(id string) (*models.Profile, error) {
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
 
@@ -47,7 +47,7 @@ func (db *InMemoryDB) GetProfile(id string) (*models2.Profile, error) {
 }
 
 //CreateProfile creates the profile withing the database. if the profile exists or the email exist returns error
-func (db *InMemoryDB) CreateProfile(profile *models2.Profile) (*models2.Profile, error) {
+func (db *InMemoryDB) CreateProfile(profile *models.Profile) (*models.Profile, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
@@ -67,7 +67,7 @@ func (db *InMemoryDB) CreateProfile(profile *models2.Profile) (*models2.Profile,
 }
 
 //UpdateProfile updates a profile, if profile does not exist returns error
-func (db *InMemoryDB) UpdateProfile(profile *models2.Profile) (*models2.Profile, error) {
+func (db *InMemoryDB) UpdateProfile(profile *models.Profile) (*models.Profile, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 

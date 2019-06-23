@@ -1,16 +1,25 @@
 package main
 
 import (
-	db2 "github.com/kas240sx89/samples/profileService/internal/db"
-	service2 "github.com/kas240sx89/samples/profileService/internal/service"
+	//"github.com/kas240sx89/samples/profileService/config"
+	"github.com/kas240sx89/samples/profileService/internal/db"
+	"github.com/kas240sx89/samples/profileService/internal/service"
 )
 
 func main() {
 
-	database := db2.NewInMemoryDB()
-	var db service2.DB
-	db = &database
-	svc := service2.New(db)
+	database := db.NewInMemoryDB()
+	//var sDB service.DB
+	//sDB = &database
+	svc := service.New(&database)
 
 	NewServer(svc)
 }
+
+//func GetDB(cfg *config.Config) service.DB {
+//	var sDB service.DB
+//	switch cfg.ProfileDBType {
+//	case "inmemory":
+//	}
+//
+//}
